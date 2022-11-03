@@ -1,0 +1,253 @@
+version: '3.9'
+
+services:
+  cockroach:
+    image: cockroachdb/cockroach:v22.1.10
+    volumes:
+      - cockroach-data:/cockroach/cockroach-data
+    ports:
+      - 26257:26257
+    command: start-single-node --insecure
+    networks:
+      - intranet
+
+  cockroach-init:
+    image: cockroachdb/cockroach:v22.1.10
+    command: >
+      sql --insecure --host="cockroach" --execute="
+        CREATE DATABASE IF NOT EXISTS kratos;
+        CREATE USER IF NOT EXISTS kratos; GRANT ALL ON DATABASE kratos TO kratos WITH GRANT OPTION;
+        CREATE DATABASE IF NOT EXISTS keto;
+        CREATE USER IF NOT EXISTS keto; GRANT ALL ON DATABASE keto TO keto WITH GRANT OPTION;
+      "
+    depends_on:
+      - cockroach
+    restart: on-failure
+    networks:
+      - intranet
+
+  mongo:
+    image: mongo:6.0
+    volumes:
+      - mongo-data:/data/db
+    ports:
+      - 27017:27017
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: timada
+      MONGO_INITDB_ROOT_PASSWORD: alphadeltaomega
+    networks:
+      - intranet
+
+  pulsar:
+    image: apachepulsar/pulsar:2.10.2
+    volumes:
+      - pulsar-data:/pulsar/data
+    ports:
+      - 6650:6650
+    command: bin/pulsar standalone
+    networks:
+      - intranet
+
+  kratos-migrate:
+    image: oryd/kratos:v0.10.1
+    environment:
+      - DSN=cockroach://kratos@cockroach:26257/kratos?sslmode=disable&max_conns=20&max_idle_conns=4
+    volumes:
+      - type: bind
+        source: ./kratos/email-password
+        target: /etc/config/kratos
+    command: -c /etc/config/kratos/kratos.yml migrate sql -e --yes
+    restart: on-failure
+    networks:
+      - intranet
+
+  kratos:
+    depends_on:
+      - kratos-migrate
+    image: oryd/kratos:v0.10.1
+    labels:
+      - "traefik.enable=true"
+
+      - "traefik.http.middlewares.kratos-stripprefix.stripprefix.prefixes=/kratos"
+      - "traefik.http.routers.kratos.rule=Host(`timada.localhost`) && PathPrefix(`/kratos`)"
+      - "traefik.http.routers.kratos.tls=true"
+      - "traefik.http.routers.kratos.entrypoints=https"
+      - "traefik.http.routers.kratos.service=kratos"
+      - "traefik.http.routers.kratos.middlewares=kratos-stripprefix"
+
+      - "traefik.http.services.kratos.loadbalancer.server.port=4433"
+
+      - "traefik.http.routers.kratos-admin.rule=Host(`admin.kratos.localhost`)"
+      - "traefik.http.routers.kratos-admin.tls=true"
+      - "traefik.http.routers.kratos-admin.entrypoints=https"
+      - "traefik.http.routers.kratos-admin.service=kratos-admin"
+
+      - "traefik.http.services.kratos-admin.loadbalancer.server.port=4434"
+    restart: unless-stopped
+    environment:
+      - DSN=cockroach://kratos@cockroach:26257/kratos?sslmode=disable&max_conns=20&max_idle_conns=4
+      - LOG_LEVEL=trace
+    command: serve -c /etc/config/kratos/kratos.yml --dev --watch-courier
+    volumes:
+      - type: bind
+        source: ./kratos/email-password
+        target: /etc/config/kratos
+    networks:
+      - intranet
+
+  kratos-selfservice-ui-node:
+    image: oryd/kratos-selfservice-ui-node:v0.10.1
+    environment:
+      - PORT=4435
+      - SECURITY_MODE=jwks
+      - KRATOS_PUBLIC_URL=http://kratos:4433/
+      - KRATOS_BROWSER_URL=https://timada.localhost/oath/.ory/kratos/public
+    restart: on-failure
+    networks:
+      - intranet
+
+  oathkeeper:
+    image: oryd/oathkeeper:v0.38
+    labels:
+      - "traefik.enable=true"
+
+      - "traefik.http.routers.oathkeeper.rule=Host(`timada.localhost`) && PathPrefix(`/oath`)"
+      - "traefik.http.routers.oathkeeper.tls=true"
+      - "traefik.http.routers.oathkeeper.entrypoints=https"
+      - "traefik.http.routers.oathkeeper.service=oathkeeper"
+
+      - "traefik.http.services.oathkeeper.loadbalancer.server.port=4455"
+
+      - "traefik.http.routers.oathkeeper-admin.rule=Host(`admin.oathkeeper.localhost`)"
+      - "traefik.http.routers.oathkeeper-admin.tls=true"
+      - "traefik.http.routers.oathkeeper-admin.entrypoints=https"
+      - "traefik.http.routers.oathkeeper-admin.service=oathkeeper-admin"
+
+      - "traefik.http.services.oathkeeper-admin.loadbalancer.server.port=4456"
+    depends_on:
+      - kratos
+    command: serve proxy -c "/etc/config/oathkeeper/oathkeeper.yml"
+    environment:
+      - LOG_LEVEL=debug
+    restart: on-failure
+    volumes:
+      - ./oathkeeper:/etc/config/oathkeeper
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - intranet
+  
+  keto-migrate:
+    image: oryd/keto:v0.10.0-alpha.0
+    volumes:
+      - type: bind
+        source: ./keto/keto.yml
+        target: /home/ory/keto.yml
+    environment:
+      - LOG_LEVEL=debug
+      - DSN=cockroach://keto@cockroach:26257/keto?sslmode=disable&max_conns=20&max_idle_conns=4
+    command: ["migrate", "up", "-y"]
+    restart: on-failure
+    networks:
+      - intranet
+
+  keto:
+    image: oryd/keto:v0.10.0-alpha.0
+    labels:
+      - "traefik.enable=true"
+
+      - "traefik.http.routers.keto.rule=Host(`keto.localhost`)"
+      - "traefik.http.routers.keto.tls=true"
+      - "traefik.http.routers.keto.entrypoints=https"
+      - "traefik.http.routers.keto.service=keto"
+
+      - "traefik.http.services.keto.loadbalancer.server.port=4466"
+
+      - "traefik.http.routers.keto-admin.rule=Host(`admin.keto.localhost`)"
+      - "traefik.http.routers.keto-admin.tls=true"
+      - "traefik.http.routers.keto-admin.entrypoints=https"
+      - "traefik.http.routers.keto-admin.service=keto-admin"
+
+      - "traefik.http.services.keto-admin.loadbalancer.server.port=4467"
+    depends_on:
+      - keto-migrate
+    command: serve -c /home/ory/keto.yml
+    environment:
+      - LOG_LEVEL=debug
+      - PORT=4466
+      - DSN=cockroach://keto@cockroach:26257/keto?sslmode=disable&max_conns=20&max_idle_conns=4
+    restart: on-failure
+    volumes:
+      - type: bind
+        source: ./keto/keto.yml
+        target: /home/ory/keto.yml
+    networks:
+      - intranet
+
+  mailslurper:
+    image: oryd/mailslurper:latest-smtps
+    labels:
+      - "traefik.enable=true"
+
+      - "traefik.http.routers.mailslurper.rule=Host(`mailslurper.localhost`)"
+      - "traefik.http.routers.mailslurper.tls=true"
+      - "traefik.http.routers.mailslurper.entrypoints=https"
+      - "traefik.http.routers.mailslurper.service=mailslurper"
+
+      - "traefik.http.services.mailslurper.loadbalancer.server.port=4436"
+
+      - "traefik.http.routers.mailslurper-api.rule=Host(`api.mailslurper.localhost`)"
+      - "traefik.http.routers.mailslurper-api.tls=true"
+      - "traefik.http.routers.mailslurper-api.entrypoints=https"
+      - "traefik.http.routers.mailslurper-api.service=mailslurper-api"
+
+      - "traefik.http.services.mailslurper-api.loadbalancer.server.port=4437"
+    ports:
+      - "4437:4437"
+    networks:
+      - intranet
+
+  pikav:
+    image: timada0/pikav:0.10.1
+    command: serve -c /etc/config/pikav.yml
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.pikav.rule=Host(`pikav.localhost`)"
+      - "traefik.http.routers.pikav.tls=true"
+      - "traefik.http.routers.pikav.entrypoints=https"
+    depends_on:
+      - oathkeeper
+    volumes:
+      - ./pikav/pikav.yml:/etc/config/pikav.yml
+    networks:
+      - intranet
+
+  traefik:
+    image: "traefik:v2.9"
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8080:8080"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.api.rule=Host(`traefik.localhost`)"
+      - "traefik.http.routers.api.tls=true"
+      - "traefik.http.routers.api.entrypoints=https"
+      - "traefik.http.routers.api.service=api@internal"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      - "./traefik/traefik.yml:/etc/traefik/traefik.yml"
+      - "./traefik/dynamic.yml:/etc/traefik/dynamic.yml"
+      - "./certs:/etc/traefik/certs"
+    networks:
+      - intranet
+
+networks:
+  intranet:
+    name: timada
+
+volumes:
+  cockroach-data:
+  mongo-data:
+  pulsar-data:
+  kratos-data:
