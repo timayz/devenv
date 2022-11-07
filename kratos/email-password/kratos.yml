@@ -13,7 +13,7 @@ serve:
 selfservice:
   default_browser_return_url: https://timada.localhost/oath/
   allowed_return_urls:
-    - https://timada.localhost/oath/
+    - https://timada.localhost/
     - https://cobase.timada.localhost/
     - https://fander.timada.localhost/
     - https://memone.timada.localhost/
