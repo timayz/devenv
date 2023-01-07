@@ -82,9 +82,9 @@
   upstream:
     preserve_host: true
     url: "http://host.docker.internal:3011"
-    strip_path: /api/cobase
+    strip_path: /cobase
   match:
-    url: "https://timada.localhost/api/cobase/<**>"
+    url: "https://timada.localhost/cobase/<**>"
     methods:
       - GET
       - POST

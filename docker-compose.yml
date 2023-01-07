@@ -111,7 +111,7 @@ services:
     labels:
       - "traefik.enable=true"
 
-      - "traefik.http.routers.oathkeeper.rule=Host(`timada.localhost`) && (PathPrefix(`/oath`) || PathPrefix(`/api`))"
+      - "traefik.http.routers.oathkeeper.rule=Host(`timada.localhost`)"
       - "traefik.http.routers.oathkeeper.tls=true"
       - "traefik.http.routers.oathkeeper.entrypoints=https"
       - "traefik.http.routers.oathkeeper.service=oathkeeper"
