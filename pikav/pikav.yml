@@ -1,6 +1,11 @@
-listen: "0.0.0.0:6750"
-cors_permissive: true
+addr:
+  api: "0.0.0.0:6750"
+  cluster: "[::1]:6751"
 
-jwks_url: http://oathkeeper:4456/.well-known/jwks.json
+cors:
+  permissive: true
+
+jwks:
+  url: http://oathkeeper:4456/.well-known/jwks.json
 
 nodes: []
