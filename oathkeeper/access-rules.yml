@@ -81,7 +81,7 @@
 - id: "cobase:protected"
   upstream:
     preserve_host: true
-    url: "http://host.docker.internal:3011"
+    url: "http://host.docker.internal:3010"
     strip_path: /cobase
   match:
     url: "https://timada.localhost/cobase/<**>"
