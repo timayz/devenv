@@ -210,8 +210,8 @@ services:
       - intranet
 
   pikav:
-    image: timada0/pikav:0.12.0
-    command: serve -c /etc/config/pikav.yml
+    image: timada0/pikav:0.12.1
+    command: serve -c /etc/pikav/config.yml
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.pikav.rule=Host(`pikav.localhost`)"
@@ -223,7 +223,7 @@ services:
       - "6750:6750"
       - "6751:6751"
     volumes:
-      - ./pikav/pikav.yml:/etc/config/pikav.yml
+      - ./pikav/pikav.yml:/etc/pikav/config.yml
     networks:
       - intranet
 
