@@ -211,7 +211,6 @@ services:
 
   pikav:
     image: timada0/pikav:0.12.1
-    command: serve -c /etc/pikav/config.yml
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.pikav.rule=Host(`pikav.localhost`)"
