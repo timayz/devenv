@@ -210,7 +210,7 @@ services:
       - intranet
 
   pikav:
-    image: timada0/pikav:0.12.1
+    image: timada0/pikav:0.12.2
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.pikav.rule=Host(`pikav.localhost`)"
