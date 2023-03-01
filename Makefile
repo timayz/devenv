@@ -1,11 +1,11 @@
 up:
-	docker compose up -d
+	docker compose up -d --remove-orphans
 
 stop:
 	docker compose stop
 
 down:
-	docker compose down -v
+	docker compose down -v --remove-orphans
 
 # https://github.com/FiloSottile/mkcert
 cert.init:
