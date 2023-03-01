@@ -38,16 +38,6 @@ services:
     networks:
       - intranet
 
-  pulsar:
-    image: apachepulsar/pulsar:2.10.2
-    volumes:
-      - pulsar-data:/pulsar/data
-    ports:
-      - 6650:6650
-    command: bin/pulsar standalone
-    networks:
-      - intranet
-
   kratos-migrate:
     image: oryd/kratos:v0.10.1
     environment:
@@ -253,5 +243,4 @@ networks:
 volumes:
   cockroach-data:
   mongo-data:
-  pulsar-data:
   kratos-data:
