@@ -2,7 +2,7 @@ version: '3.9'
 
 services:
   cockroach:
-    image: cockroachdb/cockroach:v22.1.10
+    image: cockroachdb/cockroach:v22.2.5
     volumes:
       - cockroach-data:/cockroach/cockroach-data
     ports:
@@ -12,7 +12,7 @@ services:
       - intranet
 
   cockroach-init:
-    image: cockroachdb/cockroach:v22.1.10
+    image: cockroachdb/cockroach:v22.2.5
     command: >
       sql --insecure --host="cockroach" --execute="
         CREATE DATABASE IF NOT EXISTS kratos;
@@ -26,20 +26,8 @@ services:
     networks:
       - intranet
 
-  mongo:
-    image: mongo:6.0
-    volumes:
-      - mongo-data:/data/db
-    ports:
-      - 27017:27017
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: timada
-      MONGO_INITDB_ROOT_PASSWORD: alphadeltaomega
-    networks:
-      - intranet
-
   kratos-migrate:
-    image: oryd/kratos:v0.10.1
+    image: oryd/kratos:v0.11.1
     environment:
       - DSN=cockroach://kratos@cockroach:26257/kratos?sslmode=disable&max_conns=20&max_idle_conns=4
     volumes:
@@ -54,7 +42,7 @@ services:
   kratos:
     depends_on:
       - kratos-migrate
-    image: oryd/kratos:v0.10.1
+    image: oryd/kratos:v0.11.1
     labels:
       - "traefik.enable=true"
 
@@ -86,7 +74,7 @@ services:
       - intranet
 
   kratos-selfservice-ui-node:
-    image: oryd/kratos-selfservice-ui-node:v0.10.1
+    image: oryd/kratos-selfservice-ui-node:v0.12.3
     environment:
       - PORT=4435
       - SECURITY_MODE=jwks
@@ -97,7 +85,7 @@ services:
       - intranet
 
   oathkeeper:
-    image: oryd/oathkeeper:v0.38
+    image: oryd/oathkeeper:v0.40.1
     labels:
       - "traefik.enable=true"
 
@@ -130,7 +118,7 @@ services:
       - intranet
   
   keto-migrate:
-    image: oryd/keto:v0.10.0-alpha.0
+    image: oryd/keto:v0.11.0
     volumes:
       - type: bind
         source: ./keto/keto.yml
@@ -144,7 +132,7 @@ services:
       - intranet
 
   keto:
-    image: oryd/keto:v0.10.0-alpha.0
+    image: oryd/keto:v0.11.0
     labels:
       - "traefik.enable=true"
 
@@ -242,5 +230,4 @@ networks:
 
 volumes:
   cockroach-data:
-  mongo-data:
   kratos-data:
