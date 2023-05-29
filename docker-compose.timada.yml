@@ -1,0 +1,22 @@
+services:
+  pikav:
+    image: timada0/pikav:0.17.2
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.pikav.rule=Host(`pikav.timada.localhost`)"
+      - "traefik.http.routers.pikav.tls=true"
+      - "traefik.http.routers.pikav.entrypoints=https"
+    ports:
+      - "6750:6750"
+      - "6751:6751"
+    volumes:
+      - ./timada/pikav.yml:/etc/pikav/config.yml
+    networks:
+      - intranet
+    command: pikav serve -c /etc/pikav/config.yml
+    entrypoint: []
+
+networks:
+  intranet:
+    name: timada
+    external: true
