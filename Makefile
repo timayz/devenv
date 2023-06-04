@@ -6,6 +6,7 @@ cert.init:
 	mkcert -key-file traefik/certs/timada.key -cert-file traefik/certs/timada.crt timada.localhost *.timada.localhost
 
 down: timada.down ory.down cockroach.down root.down
+
 stop: timada.stop ory.stop cockroach.stop root.stop
 
 root.up:
