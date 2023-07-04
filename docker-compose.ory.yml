@@ -1,6 +1,6 @@
 services:
   ory-cockroach-init:
-    image: cockroachdb/cockroach:v23.1.2
+    image: cockroachdb/cockroach:v23.1.4
     command: >
       sql --insecure --host="cockroach" --execute="
         CREATE DATABASE IF NOT EXISTS kratos;
@@ -74,7 +74,7 @@ services:
       - intranet
 
   oathkeeper:
-    image: oryd/oathkeeper:v0.40.1
+    image: oryd/oathkeeper:v0.40
     labels:
       - "traefik.enable=true"
 
@@ -109,7 +109,7 @@ services:
       - intranet
   
   keto-migrate:
-    image: oryd/keto:v0.11.1
+    image: oryd/keto:v0.11
     volumes:
       - type: bind
         source: ./ory/keto.yml
@@ -123,7 +123,7 @@ services:
       - intranet
 
   keto:
-    image: oryd/keto:v0.11.1
+    image: oryd/keto:v0.11
     labels:
       - "traefik.enable=true"
 
