@@ -102,7 +102,7 @@ services:
     volumes:
       - ./ory/oathkeeper.yml:/etc/config/oathkeeper/oathkeeper.yml
       - ./ory/id_token.jwks.json:/etc/config/oathkeeper/id_token.jwks.json
-      - ./ory/access-rules.yml:/etc/config/oathkeeper/access-rules.yml
+      - ./ory/rules:/etc/config/oathkeeper/rules
     extra_hosts:
       - "host.docker.internal:host-gateway"
     networks:
