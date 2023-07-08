@@ -82,14 +82,22 @@ services:
       - "traefik.http.routers.oathkeeper.tls=true"
       - "traefik.http.routers.oathkeeper.entrypoints=https"
       - "traefik.http.routers.oathkeeper.service=oathkeeper"
-
       - "traefik.http.services.oathkeeper.loadbalancer.server.port=4455"
+
+      - "traefik.http.middlewares.oathkeeper-ws-headers.headers.customrequestheaders.X-Forwarded-Proto=https"
+      - "traefik.http.middlewares.oathkeeper-ws-headers.headers.customrequestheaders.Connection=keep-alive, Upgrade"
+      - "traefik.http.middlewares.oathkeeper-ws-headers.headers.customrequestheaders.Upgrade=WebSocket"
+      - "traefik.http.routers.oathkeeper-ws.rule=Host(`ws.timada.localhost`)"
+      - "traefik.http.routers.oathkeeper-ws.tls=true"
+      - "traefik.http.routers.oathkeeper-ws.entrypoints=https"
+      - "traefik.http.routers.oathkeeper-ws.service=oathkeeper"
+      - "traefik.http.routers.oathkeeper-ws.middlewares=oathkeeper-ws-headers"
+      - "traefik.http.services.oathkeeper-ws.loadbalancer.server.port=4455" 
 
       - "traefik.http.routers.oathkeeper-admin.rule=Host(`admin.oathkeeper.localhost`)"
       - "traefik.http.routers.oathkeeper-admin.tls=true"
       - "traefik.http.routers.oathkeeper-admin.entrypoints=https"
       - "traefik.http.routers.oathkeeper-admin.service=oathkeeper-admin"
-
       - "traefik.http.services.oathkeeper-admin.loadbalancer.server.port=4456"
     depends_on:
       - kratos

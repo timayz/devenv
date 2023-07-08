@@ -28,7 +28,7 @@
      url: "http://host.docker.internal:3001"
      strip_path: /starter-reload
    match:
-     url: "https://timada.localhost/starter-reload/<**>"
+     url: "https://ws.timada.localhost/starter-reload/<**>"
      methods:
        - GET
       #- POST
