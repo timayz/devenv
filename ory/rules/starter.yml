@@ -21,13 +21,13 @@
        config:
          to: https://timada.localhost/oath/login
  
- - id: "starter:reload"
+ - id: "starter:ws"
    upstream:
      preserve_host: true 
      url: "http://host.docker.internal:3001"
-     strip_path: /starter-reload
+     strip_path: /starter
    match:
-     url: "https://ws.timada.localhost/starter-reload/<**>"
+     url: "https://ws.timada.localhost/starter/<**>"
      methods:
        - GET
    authenticators:
