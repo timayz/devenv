@@ -63,7 +63,7 @@ services:
       - intranet
 
   kratos-selfservice-ui-node:
-    image: oryd/kratos-selfservice-ui-node:v0.13.0
+    image: oryd/kratos-selfservice-ui-node:v1.0.0
     environment:
       - PORT=4435
       - SECURITY_MODE=jwks
