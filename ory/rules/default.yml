@@ -57,16 +57,12 @@
 - id: "pikav:protected"
   upstream:
     preserve_host: true
-    url: "http://pikav:6750"
-    strip_path: /oath/pikav
+    url: "http://pikav:6750/events"
+    strip_path: /pikav
   match:
-    url: "https://timada.localhost/oath/pikav/<**>"
+    url: "https://timada.localhost/pikav/<**>"
     methods:
       - GET
-      - POST
-      - PUT
-      - DELETE
-      - PATCH
   authenticators:
     - handler: cookie_session
   authorizer:
