@@ -9,6 +9,16 @@ services:
     networks:
       - intranet
 
+  # pulsar:
+  #   image: apachepulsar/pulsar:3.1.0
+  #   volumes:
+  #     - pulsar-data:/pulsar/data
+  #   ports:
+  #     - 6650:6650
+  #   command: bin/pulsar standalone
+  #   networks:
+  #     - intranet
+
 networks:
   intranet:
     name: timada
@@ -16,3 +26,4 @@ networks:
 
 volumes:
   cockroach-data:
+  # pulsar-data:
