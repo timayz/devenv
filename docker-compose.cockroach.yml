@@ -1,6 +1,6 @@
 services:
   cockroach:
-    image: cockroachdb/cockroach:v23.1.11
+    image: cockroachdb/cockroach:v23.1.12
     volumes:
       - cockroach-data:/cockroach/cockroach-data
     ports:
