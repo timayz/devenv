@@ -1,6 +1,6 @@
 services:
   pikav:
-    image: timayz/pikav:0.20.7
+    image: timayz/pikav:0.20.9
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.pikav.rule=Host(`pikav.timada.localhost`)"
