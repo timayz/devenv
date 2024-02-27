@@ -1,6 +1,6 @@
 services:
   ory-cockroach-init:
-    image: cockroachdb/cockroach:v23.2.0
+    image: cockroachdb/cockroach:v23.2.1
     command: >
       sql --insecure --host="cockroach" --execute="
         CREATE DATABASE IF NOT EXISTS kratos;
@@ -13,7 +13,7 @@ services:
       - intranet
 
   kratos-migrate:
-    image: oryd/kratos:v1.0.0
+    image: oryd/kratos:v1.1.0
     environment:
       - DSN=cockroach://kratos@cockroach:26257/kratos?sslmode=disable&max_conns=20&max_idle_conns=4
     volumes:
@@ -28,7 +28,7 @@ services:
   kratos:
     depends_on:
       - kratos-migrate
-    image: oryd/kratos:v1.0.0
+    image: oryd/kratos:v1.1.0
     labels:
       - "traefik.enable=true"
 
@@ -63,7 +63,7 @@ services:
       - intranet
 
   kratos-selfservice-ui-node:
-    image: oryd/kratos-selfservice-ui-node:v1.0.0
+    image: oryd/kratos-selfservice-ui-node:v1.1.0
     environment:
       - PORT=4435
       - SECURITY_MODE=jwks
