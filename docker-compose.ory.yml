@@ -1,6 +1,6 @@
 services:
   ory-cockroach-init:
-    image: cockroachdb/cockroach:v23.2.1
+    image: cockroachdb/cockroach:v23.2.4
     command: >
       sql --insecure --host="cockroach" --execute="
         CREATE DATABASE IF NOT EXISTS kratos;
